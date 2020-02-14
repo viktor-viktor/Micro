@@ -24,7 +24,6 @@ namespace GW_Api.Bindings
             _clientFactory = clientFactory;
         }
 
-
         [Route("{permission}/{service}/{url}")]
         [HttpGet]
         public void Get(string permission, string service, string url)
@@ -61,8 +60,24 @@ namespace GW_Api.Bindings
             return false;
         }
 
-        private void RedirectRequest(/*post/get/put*/string permission, string service, string url)
+        private async Task<string> RedirectRequest(string method, string permission, string service, string url)
         {
+            string domain = "domain"; //need to create config file where all services domains are registered, save it as map and retrieve here by service
+            string fullUrl = domain + url;
+            var request = new HttpRequestMessage(HttpMethod.Get, fullUrl);
+            foreach (var header in Request.Headers)
+            {
+                if (header.Key != "Authorization")
+                {
+                    request.Headers.Add(header.Key, header.Value.ToString());
+                }
+            }
+
+            var client = _clientFactory.CreateClient();
+            var response = await client.SendAsync(request);
+
+            // tmp, need to return actual data received from service.
+            return "Redirection succeeded";
         }
     }
 }
